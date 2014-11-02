@@ -15,6 +15,26 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
+	<dependencies>
+		<dependency>
+			<groupId>org.nervworks.wm</groupId>
+			<artifactId>WeatherMonitorModel</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+		</dependency>
+	</dependencies>
+
 	<build>
 		<plugins>
 			<plugin>
@@ -22,7 +42,7 @@
 				<artifactId>maven-jar-plugin</artifactId>
 				<version>2.3.2</version>
 				<configuration>
-					<finalName>WeatherMonitorGUI</finalName>
+					<finalName>SensorNetworkSimGUI</finalName>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -52,7 +72,7 @@
 							<transformers>
 								<transformer
 									implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-									<mainClass>org.sd.wms.gui.WeatherMonitorGUI</mainClass>
+									<mainClass>com.uag.sd.weathermonitor.gui.Main</mainClass>
 								</transformer>
 							</transformers>
 						</configuration>
