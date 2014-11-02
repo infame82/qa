@@ -10,9 +10,14 @@ public class HumiditySensor extends Sensor{
 	public HumiditySensor() {
 		value = ".5";
 	}
+	
+	public HumiditySensor(String id) {
+		super(id);
+		value = ".5";
+	}
 
 	@Override
-	protected String detect() {
+	public String detect() {
 		return value;
 	}
 

@@ -14,6 +14,11 @@ public class TemperatureSensor extends Sensor{
 		value = "27";
 		scale = SCALE.CELSIUS;
 	}
+	public TemperatureSensor(String id) {
+		super(id);
+		value = "27";
+		scale = SCALE.CELSIUS;
+	}
 	
 	public TemperatureSensor(SCALE scale) {
 		this();
@@ -21,7 +26,7 @@ public class TemperatureSensor extends Sensor{
 	}
 
 	@Override
-	protected String detect() {
+	public String detect() {
 		if(scale == SCALE.CELSIUS) {
 			return value+" ºC";
 		}else {

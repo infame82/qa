@@ -1,6 +1,7 @@
 package com.uag.sd.weathermonitor.model.endpoint;
 
-import java.util.HashMap;
+import java.awt.Point;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -11,21 +12,26 @@ import org.springframework.stereotype.Component;
 import com.uag.sd.weathermonitor.model.sensor.Sensor;
 import com.uag.sd.weathermonitor.model.sensor.SensorData;
 import com.uag.sd.weathermonitor.model.sensor.SensorMonitor;
+import com.uag.sd.weathermonitor.model.traceability.Traceable;
 
 @Component("endpoint")
 @Scope("prototype")
-public class Endpoint implements SensorMonitor,Runnable {
+public class Endpoint implements SensorMonitor,Runnable,Traceable {
 	private String id;
 	private Map<String,Sensor> sensors;
 	private boolean active;
 	private ThreadPoolExecutor executorService;
 	private Integer threadPoolSize;
+	private int coverage;
+	private Point location;
 	
 	public Endpoint() {
 		threadPoolSize = 5;
 		executorService = (ThreadPoolExecutor) Executors.newFixedThreadPool(threadPoolSize);
-		sensors = new HashMap<String, Sensor>();
+		sensors = new LinkedHashMap<String, Sensor>();
 		active = false;
+		coverage = 5;
+		location = new Point();
 	}
 	
 	public Endpoint(String id) {
@@ -86,7 +92,6 @@ public class Endpoint implements SensorMonitor,Runnable {
 	
 	public void addSensor(Sensor sensor) {
 		sensor.setMonitor(this);
-		sensor.setId(id+":"+"sensor:"+sensors.size());
 		sensors.put(sensor.getId(), sensor);
 	}
 	
@@ -100,6 +105,30 @@ public class Endpoint implements SensorMonitor,Runnable {
 		System.out.println(data.getValue());
 	}
 
-	
+	@Override
+	public int getCoverage() {
+		return coverage;
+	}
+
+	@Override
+	public Point getLocation() {
+		return location;
+	}
+
+	public void setCoverage(int coverage) {
+		this.coverage = coverage;
+	}
+
+	public void setLocation(int x, int y) {
+		this.location = new Point(x,y);
+	}
+
+	public boolean equals(Object o) {
+		if(o==null || !(o instanceof Endpoint)) {
+			return false;
+		}
+		Endpoint endpoint = (Endpoint)o;
+		return endpoint.id.equals(id);
+	}
 
 }

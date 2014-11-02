@@ -16,6 +16,11 @@ public abstract class Sensor implements Runnable{
 		lapse = DEFAULT_LAPSE;
 	}
 	
+	public Sensor(String id) {
+		this();
+		this.id = id;
+	}
+	
 	@Override
 	public void run() {
 		while (active) {
@@ -30,7 +35,7 @@ public abstract class Sensor implements Runnable{
 		}
 	}
 	
-	protected abstract String detect();
+	public abstract String detect();
 	
 	public String getId() {
 		return id;
@@ -56,5 +61,13 @@ public abstract class Sensor implements Runnable{
 	}
 	public void setMonitor(SensorMonitor monitor) {
 		this.monitor = monitor;
+	}
+	
+	public String getValue() {
+		return value;
+	}
+	
+	public void setValue(String value) {
+		this.value = value;
 	}
 }
