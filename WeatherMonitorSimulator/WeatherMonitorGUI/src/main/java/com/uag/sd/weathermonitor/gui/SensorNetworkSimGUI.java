@@ -5,13 +5,12 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
-import java.util.List;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JButton;
-import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -56,8 +55,33 @@ public class SensorNetworkSimGUI implements EndpointRefresher{
 	 */
 	private void initialize() {
 		frmSensorNetworkSimulation = new JFrame();
+		frmSensorNetworkSimulation.addWindowListener(new WindowListener() {
+			
+			@Override
+			public void windowOpened(WindowEvent e) {}
+			
+			@Override
+			public void windowIconified(WindowEvent e) {}
+			
+			@Override
+			public void windowDeiconified(WindowEvent e) {}
+			
+			@Override
+			public void windowDeactivated(WindowEvent e) {}
+			
+			@Override
+			public void windowClosing(WindowEvent e) {
+				endpointTableModel.stopAllEndpoints();
+			}
+			
+			@Override
+			public void windowClosed(WindowEvent e) {}
+			
+			@Override
+			public void windowActivated(WindowEvent e) {}
+		});
 		frmSensorNetworkSimulation.setTitle("Sensor Network Simulation");
-		frmSensorNetworkSimulation.setBounds(100, 100, 536, 542);
+		frmSensorNetworkSimulation.setBounds(100, 100, 603, 542);
 		frmSensorNetworkSimulation.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frmSensorNetworkSimulation.getContentPane().setLayout(new BorderLayout(0, 0));
 
@@ -132,9 +156,25 @@ public class SensorNetworkSimGUI implements EndpointRefresher{
 		endpointIdLabel.setFont(new Font("Lucida Grande", Font.PLAIN, 12));
 		
 		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
+		
+		JButton startEndpointsButton = new JButton("Start All");
+		startEndpointsButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				endpointTableModel.startAllEnpoints();
+				sensorTableModel.fireTableDataChanged();
+			}
+		});
+		
+		JButton btnStopAll = new JButton("Stop All");
+		btnStopAll.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				endpointTableModel.stopAllEndpoints();
+				sensorTableModel.fireTableDataChanged();
+			}
+		});
 		GroupLayout gl_endpointsPanel = new GroupLayout(endpointsPanel);
 		gl_endpointsPanel.setHorizontalGroup(
-			gl_endpointsPanel.createParallelGroup(Alignment.TRAILING)
+			gl_endpointsPanel.createParallelGroup(Alignment.LEADING)
 				.addGroup(gl_endpointsPanel.createSequentialGroup()
 					.addGap(16)
 					.addGroup(gl_endpointsPanel.createParallelGroup(Alignment.LEADING)
@@ -142,24 +182,28 @@ public class SensorNetworkSimGUI implements EndpointRefresher{
 						.addGroup(gl_endpointsPanel.createSequentialGroup()
 							.addPreferredGap(ComponentPlacement.RELATED)
 							.addComponent(addEndpointButton)
-							.addPreferredGap(ComponentPlacement.UNRELATED)
+							.addPreferredGap(ComponentPlacement.RELATED)
 							.addComponent(editEndpointButton)
 							.addPreferredGap(ComponentPlacement.RELATED)
-							.addComponent(removeEndpointButton)))
-					.addContainerGap(217, Short.MAX_VALUE))
-				.addComponent(separator, GroupLayout.DEFAULT_SIZE, 427, Short.MAX_VALUE)
+							.addComponent(removeEndpointButton)
+							.addGap(6)
+							.addComponent(startEndpointsButton)
+							.addGap(6)
+							.addComponent(btnStopAll)))
+					.addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+				.addComponent(separator, GroupLayout.DEFAULT_SIZE, 404, Short.MAX_VALUE)
 				.addGroup(gl_endpointsPanel.createSequentialGroup()
 					.addGap(20)
 					.addComponent(lblEndpointId)
 					.addPreferredGap(ComponentPlacement.RELATED)
 					.addComponent(endpointIdLabel)
-					.addContainerGap(309, Short.MAX_VALUE))
+					.addContainerGap(301, Short.MAX_VALUE))
 				.addGroup(gl_endpointsPanel.createSequentialGroup()
-					.addComponent(tabbedPane, GroupLayout.DEFAULT_SIZE, 421, Short.MAX_VALUE)
+					.addComponent(tabbedPane, GroupLayout.DEFAULT_SIZE, 398, Short.MAX_VALUE)
 					.addContainerGap())
-				.addGroup(Alignment.LEADING, gl_endpointsPanel.createSequentialGroup()
+				.addGroup(gl_endpointsPanel.createSequentialGroup()
 					.addContainerGap()
-					.addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 415, Short.MAX_VALUE)
+					.addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 392, Short.MAX_VALUE)
 					.addContainerGap())
 		);
 		gl_endpointsPanel.setVerticalGroup(
@@ -170,8 +214,10 @@ public class SensorNetworkSimGUI implements EndpointRefresher{
 					.addGap(18)
 					.addGroup(gl_endpointsPanel.createParallelGroup(Alignment.BASELINE)
 						.addComponent(addEndpointButton)
+						.addComponent(editEndpointButton)
 						.addComponent(removeEndpointButton)
-						.addComponent(editEndpointButton))
+						.addComponent(startEndpointsButton)
+						.addComponent(btnStopAll))
 					.addPreferredGap(ComponentPlacement.RELATED)
 					.addComponent(scrollPane, GroupLayout.PREFERRED_SIZE, 74, GroupLayout.PREFERRED_SIZE)
 					.addPreferredGap(ComponentPlacement.UNRELATED)
@@ -181,7 +227,7 @@ public class SensorNetworkSimGUI implements EndpointRefresher{
 						.addComponent(lblEndpointId)
 						.addComponent(endpointIdLabel))
 					.addGap(12)
-					.addComponent(tabbedPane, GroupLayout.DEFAULT_SIZE, 309, Short.MAX_VALUE))
+					.addComponent(tabbedPane, GroupLayout.DEFAULT_SIZE, 295, Short.MAX_VALUE))
 		);
 		
 		JPanel panel = new JPanel();
@@ -191,7 +237,8 @@ public class SensorNetworkSimGUI implements EndpointRefresher{
 		addSensorButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				try {
-					SensorDialogGUI dialog = new SensorDialogGUI(null,sensorTableModel);
+					Endpoint endpoint = endpointTableModel.getEndpoint(endPointsTable.getSelectedRow());
+					SensorDialogGUI dialog = new SensorDialogGUI(endpoint,null,sensorTableModel);
 					dialog.setTitle("Add Sensor");
 					dialog.setVisible(true);
 				} catch (Exception ex) {
@@ -205,8 +252,9 @@ public class SensorNetworkSimGUI implements EndpointRefresher{
 		editSensorButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				try {
+					Endpoint endpoint = endpointTableModel.getEndpoint(endPointsTable.getSelectedRow());
 					Sensor sensor = sensorTableModel.getSensor(sensorsTable.getSelectedRow());
-					SensorDialogGUI dialog = new SensorDialogGUI(sensor,sensorTableModel);
+					SensorDialogGUI dialog = new SensorDialogGUI(endpoint,sensor,sensorTableModel);
 					dialog.setTitle("Edit Sensor");
 					dialog.setVisible(true);
 				} catch (Exception ex) {
@@ -309,17 +357,11 @@ public class SensorNetworkSimGUI implements EndpointRefresher{
 	        		return;
 	        	}
 	            Endpoint endpoint = endpointTableModel.getEndpoint(endPointsTable.getSelectedRow());
+	            sensorTableModel.setEndpoint(endpoint);
 	            refreshEndpointDetails(endpoint);
 	            editEndpointButton.setEnabled(true);
 	            removeEndpointButton.setEnabled(true);
 	            addSensorButton.setEnabled(true);
-	            List<Sensor> sensors = new ArrayList<Sensor>();
-	            if(endpoint.getSensors()!=null) {
-	            	for(Sensor sensor:endpoint.getSensors().values()) {
-	            		sensors.add(sensor);
-	            	}
-	            }
-	            sensorTableModel.replaceAll(sensors);
 	        }
 	    });
 		sensorsTable.getSelectionModel().addListSelectionListener(new ListSelectionListener(){
@@ -334,7 +376,8 @@ public class SensorNetworkSimGUI implements EndpointRefresher{
 		
 		removeEndpointButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				endpointTableModel.removeEndpoint(endPointsTable.getSelectedRow());
+				Endpoint endpoint = endpointTableModel.removeEndpoint(endPointsTable.getSelectedRow());
+				endpoint.stop();
 				endPointsTable.getSelectionModel().clearSelection();
 				removeEndpointButton.setEnabled(false);
 				editEndpointButton.setEnabled(false);
@@ -346,9 +389,8 @@ public class SensorNetworkSimGUI implements EndpointRefresher{
 		
 		deleteSensorButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				Endpoint endpoint = endpointTableModel.getEndpoint(endPointsTable.getSelectedRow());
-				Sensor sensor = sensorTableModel.removeSensor(sensorsTable.getSelectedRow());
-				endpoint.getSensors().remove(sensor.getId());
+				Endpoint endpoint = sensorTableModel.getEndpoint();
+				endpoint.removeSensor(sensorsTable.getSelectedRow());
 				sensorsTable.getSelectionModel().clearSelection();
 				deleteSensorButton.setEnabled(false);
 				editSensorButton.setEnabled(false);

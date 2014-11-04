@@ -2,7 +2,6 @@ package com.uag.sd.weathermonitor.gui;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
-import java.awt.Window.Type;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -21,6 +20,7 @@ import javax.swing.SpinnerModel;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.border.EmptyBorder;
 
+import com.uag.sd.weathermonitor.model.endpoint.Endpoint;
 import com.uag.sd.weathermonitor.model.sensor.HumiditySensor;
 import com.uag.sd.weathermonitor.model.sensor.Sensor;
 import com.uag.sd.weathermonitor.model.sensor.TemperatureSensor;
@@ -38,6 +38,7 @@ public class SensorDialogGUI extends JDialog {
 	private JTextField valueField;
 	private JSpinner lapseBox;
 	private JCheckBox chckbxActive;
+	private Endpoint endpoint;
 	private Sensor sensor;
 	private SensorTableModel sensorTableModel;
 
@@ -53,8 +54,9 @@ public class SensorDialogGUI extends JDialog {
 		}
 	}
 	
-	public SensorDialogGUI(Sensor sensor,SensorTableModel sensorTableModel) {
+	public SensorDialogGUI(Endpoint endpoint,Sensor sensor,SensorTableModel sensorTableModel) {
 		this();
+		this.endpoint = endpoint;
 		this.sensor = sensor;
 		this.sensorTableModel = sensorTableModel;
 		if(sensor!=null) {
@@ -160,6 +162,7 @@ public class SensorDialogGUI extends JDialog {
 				okButton.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
 						boolean isNew = false;
+						
 						if(sensor==null) {
 							if(typeBox.getSelectedIndex()==0) {
 								sensor = new TemperatureSensor(idField.getText());
@@ -168,12 +171,25 @@ public class SensorDialogGUI extends JDialog {
 							}
 							isNew = true;
 						}
+						boolean prevState = sensor.isActive();
 						sensor.setLapse(((int)lapseBox.getModel().getValue())*1000);
 						sensor.setValue(valueField.getText());
 						sensor.setActive(chckbxActive.isSelected());
 						if(isNew) {
-							sensorTableModel.addSensor(sensor);
+							int rowCount = endpoint.getSensors().size();
+							endpoint.addSensor(sensor);
+							sensorTableModel.fireTableRowsInserted(rowCount, rowCount);
+							if(sensor.isActive()) {
+								endpoint.startSensor(sensor);
+							}
 						}else {
+							if(prevState != sensor.isActive()) {
+								if(sensor.isActive()) {
+									endpoint.startSensor(sensor);
+								}else {
+									endpoint.stopSensor(sensor);
+								}
+							}
 							int rowIndex = sensorTableModel.getIndexOf(sensor);
 							sensorTableModel.fireTableRowsUpdated(rowIndex, rowIndex);
 						}

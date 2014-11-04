@@ -1,8 +1,8 @@
 package com.uag.sd.weathermonitor.model.endpoint;
 
 import java.awt.Point;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 
@@ -18,7 +18,7 @@ import com.uag.sd.weathermonitor.model.traceability.Traceable;
 @Scope("prototype")
 public class Endpoint implements SensorMonitor,Runnable,Traceable {
 	private String id;
-	private Map<String,Sensor> sensors;
+	private List<Sensor> sensors;
 	private boolean active;
 	private ThreadPoolExecutor executorService;
 	private Integer threadPoolSize;
@@ -26,9 +26,9 @@ public class Endpoint implements SensorMonitor,Runnable,Traceable {
 	private Point location;
 	
 	public Endpoint() {
-		threadPoolSize = 5;
+		threadPoolSize = 50;
 		executorService = (ThreadPoolExecutor) Executors.newFixedThreadPool(threadPoolSize);
-		sensors = new LinkedHashMap<String, Sensor>();
+		sensors = new ArrayList<Sensor>();
 		active = false;
 		coverage = 5;
 		location = new Point();
@@ -41,6 +41,7 @@ public class Endpoint implements SensorMonitor,Runnable,Traceable {
 	
 	@Override
 	public void run() {
+		active = true;
 		start();
 		while(active) {
 			try {
@@ -59,11 +60,11 @@ public class Endpoint implements SensorMonitor,Runnable,Traceable {
 		this.id = id;
 	}
 
-	public Map<String, Sensor> getSensors() {
+	public List<Sensor> getSensors() {
 		return sensors;
 	}
 
-	public void setSensors(Map<String, Sensor> sensors) {
+	public void setSensors(List<Sensor> sensors) {
 		this.sensors = sensors;
 	}
 
@@ -76,28 +77,59 @@ public class Endpoint implements SensorMonitor,Runnable,Traceable {
 	}
 
 	private void start() {
-		for(Sensor sensor:sensors.values()) {
-			sensor.setActive(true);
-			executorService.execute(sensor);
+		for(Sensor sensor:sensors) {
+			startSensor(sensor);
 		}
 	}
 	
+	public void startSensor(Sensor sensor) {
+		sensor.setActive(true);
+		
+		executorService.execute(sensor);
+	}
+	
 	public void stop() {
-		for(Sensor sensor:sensors.values()) {
-			sensor.setActive(false);
-			executorService.remove(sensor);
+		for(Sensor sensor:sensors) {
+			stopSensor(sensor);
 		}
 		active = false;
 	}
 	
+	public void stopSensor(Sensor sensor) {
+		sensor.setActive(false);
+		executorService.remove(sensor);
+	}
+	
+	public void stopSensor(int index) {
+		Sensor sensor = sensors.get(index);
+		sensor.setActive(false);
+		executorService.remove(sensor);
+	}
+	
 	public void addSensor(Sensor sensor) {
+		sensor.setParent(this);
 		sensor.setMonitor(this);
-		sensors.put(sensor.getId(), sensor);
+		sensors.add(sensor);
+	}
+	
+	public int getSensorIndex(String id) {
+		int index = -1;
+		for(Sensor sensor:sensors) {
+			if(sensor.getId().equals(id)) {
+				return index+1;
+			}
+			index++;
+		}
+		return index;
 	}
 	
 	public void removeSensor(String sensorId) {
-		Sensor sensor = sensors.remove(sensorId);
-		sensor.setActive(false);
+		Sensor sensor = sensors.remove(getSensorIndex(sensorId));
+		stopSensor(sensor);
+	}
+	public void removeSensor(int index) {
+		Sensor sensor = sensors.remove(index);
+		stopSensor(sensor);
 	}
 
 	@Override

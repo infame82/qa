@@ -2,10 +2,13 @@ package com.uag.sd.weathermonitor.gui;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -18,12 +21,13 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 
 import com.uag.sd.weathermonitor.model.endpoint.Endpoint;
-import javax.swing.JCheckBox;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
 
 public class EndpointDialogGUI extends JDialog {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -6684257466299046068L;
 	private final JPanel contentPanel = new JPanel();
 	private JTextField idField;
 	private JSpinner coverageField;
@@ -219,11 +223,13 @@ public class EndpointDialogGUI extends JDialog {
 				okButton.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
 						boolean isNew = false;
+						
 						if(endpoint==null) {
 							endpoint = new Endpoint();
 							isNew = true;
 							
 						}
+						boolean prevState = endpoint.isActive();
 						endpoint.setId(idField.getText());
 						endpoint.setCoverage((int)coverageField.getModel().getValue());
 						endpoint.setLocation((int)positionXField.getModel().getValue(),
@@ -231,7 +237,17 @@ public class EndpointDialogGUI extends JDialog {
 						endpoint.setActive(activeBox.isSelected());
 						if(isNew) {
 							tableModel.addEndpoint(endpoint);
+							if(endpoint.isActive()) {
+								tableModel.startEndpoint(endpoint);
+							}
 						}else {
+							if(prevState != endpoint.isActive()) {
+								if(endpoint.isActive()) {
+									tableModel.startEndpoint(endpoint);
+								}else {
+									endpoint.stop();
+								}
+							}
 							int rowIndex = tableModel.getIndexOf(endpoint);
 							tableModel.fireTableRowsUpdated(rowIndex, rowIndex);
 							endpointRefresher.refreshEndpointDetails(endpoint);

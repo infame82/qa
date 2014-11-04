@@ -2,6 +2,8 @@ package com.uag.sd.weathermonitor.gui;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 
 import javax.swing.table.AbstractTableModel;
 
@@ -15,9 +17,11 @@ public class EndpointTableModel extends AbstractTableModel{
 	private List<Endpoint> endpoints;
 	private String[] columnNames = { "ID", "Location", "Coverage",
 	        "Status" };
+	private ThreadPoolExecutor service;
 	
 	public EndpointTableModel() {
 		endpoints = new ArrayList<Endpoint>();
+		service = (ThreadPoolExecutor) Executors.newFixedThreadPool(50);
 	}
 
 	@Override
@@ -75,6 +79,29 @@ public class EndpointTableModel extends AbstractTableModel{
 	public Endpoint removeEndpoint(int rowIndex) {
 		fireTableRowsDeleted(rowIndex, rowIndex);
 		return endpoints.remove(rowIndex);
+	}
+	
+	public void startAllEnpoints() {
+		for(Endpoint endpoint:endpoints) {
+			if(!endpoint.isActive()) {
+				service.execute(endpoint);
+			}
+		}
+		fireTableDataChanged();
+	}
+	
+	public void startEndpoint(Endpoint endpoint) {
+		service.execute(endpoint);
+	}
+	
+	public void stopAllEndpoints() {
+		for(Endpoint endpoint:endpoints) {
+			if(endpoint.isActive()) {
+				endpoint.stop();
+				service.remove(endpoint);
+			}
+		}
+		fireTableDataChanged();
 	}
 
 }

@@ -1,5 +1,7 @@
 package com.uag.sd.weathermonitor.model.sensor;
 
+import com.uag.sd.weathermonitor.model.endpoint.Endpoint;
+
 public abstract class Sensor implements Runnable{
 
 	protected String id;
@@ -7,6 +9,7 @@ public abstract class Sensor implements Runnable{
 	protected boolean active;
 	protected SensorMonitor monitor;
 	protected String value;
+	protected Endpoint parent;
 	
 	//In milliseconds, 5000 = 5 sec
 	public static final long DEFAULT_LAPSE = 5000;
@@ -21,8 +24,17 @@ public abstract class Sensor implements Runnable{
 		this.id = id;
 	}
 	
+	public void setParent(Endpoint parent) {
+		this.parent = parent;
+	}
+	
+	public Endpoint getParent() {
+		return parent;
+	}
+	
 	@Override
 	public void run() {
+		active = true;
 		while (active) {
 			if(monitor!=null) {
 				monitor.nofity(new SensorData(id, detect()));
@@ -33,6 +45,10 @@ public abstract class Sensor implements Runnable{
 				e.printStackTrace();
 			}
 		}
+	}
+	
+	public void stop() {
+		active = false;
 	}
 	
 	public abstract String detect();

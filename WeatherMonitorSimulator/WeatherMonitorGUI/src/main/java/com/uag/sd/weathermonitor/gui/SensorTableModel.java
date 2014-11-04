@@ -1,17 +1,16 @@
 package com.uag.sd.weathermonitor.gui;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import javax.swing.table.AbstractTableModel;
 
+import com.uag.sd.weathermonitor.model.endpoint.Endpoint;
 import com.uag.sd.weathermonitor.model.sensor.HumiditySensor;
 import com.uag.sd.weathermonitor.model.sensor.Sensor;
 import com.uag.sd.weathermonitor.model.sensor.TemperatureSensor;
 
 public class SensorTableModel extends AbstractTableModel{
 	
-	private List<Sensor> sensors;
+	//private List<Sensor> sensors;
+	private Endpoint endpoint;
 	private String[] columnNames = { "ID", "Type", "Lapse","Value",
 	        "Status" };
 
@@ -20,13 +19,14 @@ public class SensorTableModel extends AbstractTableModel{
 	 */
 	private static final long serialVersionUID = 829922993812147530L;
 	
-	public SensorTableModel() {
-		sensors = new ArrayList<Sensor>();
-	}
+
 
 	@Override
 	public int getRowCount() {
-		return sensors.size();
+		if(endpoint==null || endpoint.getSensors()==null) {
+			return 0;
+		}
+		return endpoint.getSensors().size();
 	}
 
 	@Override
@@ -40,7 +40,10 @@ public class SensorTableModel extends AbstractTableModel{
 
 	@Override
 	public Object getValueAt(int rowIndex, int columnIndex) {
-		Sensor sensor = sensors.get(rowIndex);
+		if(endpoint==null || endpoint.getSensors()==null || endpoint.getSensors().isEmpty()) {
+			return null;
+		}
+		Sensor sensor = endpoint.getSensors().get(rowIndex);
 		switch(columnIndex) {
 		case 0:
 			return sensor.getId();
@@ -60,31 +63,24 @@ public class SensorTableModel extends AbstractTableModel{
 		return null;
 	}
 	
-	public void addSensor(Sensor sensor) {
-		int rowCount = sensors.size();
-		sensors.add(sensor);
-		fireTableRowsInserted(rowCount, rowCount);
-	}
-	
-	public void addAll(List<Sensor> sensors) {
-		this.sensors.addAll(sensors);
+	public void setEndpoint(Endpoint endpoint) {
+		this.endpoint = endpoint;
 		fireTableDataChanged();
 	}
 	
-	public void replaceAll(List<Sensor> sensors) {
-		this.sensors = new ArrayList<Sensor>();
-		this.sensors.addAll(sensors);
-		fireTableDataChanged();
+	public Endpoint getEndpoint() {
+		return endpoint;
 	}
+	
 	
 	public Sensor getSensor(int rowIndex) {
-		return sensors.get(rowIndex);
+		return endpoint.getSensors().get(rowIndex);
 	}
 	
 	public int getIndexOf(Sensor sensor) {
 		int index = -1;
-		for(int i=0;i<sensors.size();i++) {
-			if(sensors.get(i).equals(sensor)) {
+		for(int i=0;i<endpoint.getSensors().size();i++) {
+			if(endpoint.getSensors().get(i).equals(sensor)) {
 				index = i;
 				break;
 			}
@@ -92,13 +88,10 @@ public class SensorTableModel extends AbstractTableModel{
 		return index;
 	}
 	
-	public Sensor removeSensor(int rowIndex) {
-		fireTableRowsDeleted(rowIndex, rowIndex);
-		return sensors.remove(rowIndex);
-	}
+
 	
 	public void clear() {
-		sensors = new ArrayList<Sensor>();
+		endpoint.getSensors().clear();
 		fireTableDataChanged();
 	}
 

@@ -13,8 +13,7 @@ public class Main {
 			public void run() {
 				try {
 					@SuppressWarnings("resource")
-					ApplicationContext applicationContext = new ClassPathXmlApplicationContext("/META-INF/spring/spring-ctx.xml");
-					SensorNetworkSimGUI window = applicationContext.getBean(SensorNetworkSimGUI.class);
+					SensorNetworkSimGUI window = new SensorNetworkSimGUI();
 					window.getFrame().setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
