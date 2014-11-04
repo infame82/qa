@@ -9,6 +9,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.uag.sd.weathermonitor.model.logs.SensorLog;
 import com.uag.sd.weathermonitor.model.sensor.Sensor;
 import com.uag.sd.weathermonitor.model.sensor.SensorData;
 import com.uag.sd.weathermonitor.model.sensor.SensorMonitor;
@@ -24,6 +25,7 @@ public class Endpoint implements SensorMonitor,Runnable,Traceable {
 	private Integer threadPoolSize;
 	private int coverage;
 	private Point location;
+	private SensorLog sensorLog;
 	
 	public Endpoint() {
 		threadPoolSize = 50;
@@ -34,9 +36,10 @@ public class Endpoint implements SensorMonitor,Runnable,Traceable {
 		location = new Point();
 	}
 	
-	public Endpoint(String id) {
+	public Endpoint(String id,SensorLog sensorLog) {
 		this();
 		this.id = id;
+		this.sensorLog = sensorLog;
 	}
 	
 	@Override
@@ -134,7 +137,9 @@ public class Endpoint implements SensorMonitor,Runnable,Traceable {
 
 	@Override
 	public synchronized void nofity(SensorData data) {
-		System.out.println(data.getValue());
+		if(sensorLog!=null) {
+			sensorLog.info(data);
+		}
 	}
 
 	@Override
@@ -162,5 +167,15 @@ public class Endpoint implements SensorMonitor,Runnable,Traceable {
 		Endpoint endpoint = (Endpoint)o;
 		return endpoint.id.equals(id);
 	}
+
+	public SensorLog getSensorLog() {
+		return sensorLog;
+	}
+
+	public void setSensorLog(SensorLog sensorLog) {
+		this.sensorLog = sensorLog;
+	}
+	
+	
 
 }

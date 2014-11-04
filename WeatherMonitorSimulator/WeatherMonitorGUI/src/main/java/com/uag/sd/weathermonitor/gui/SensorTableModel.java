@@ -72,10 +72,7 @@ public class SensorTableModel extends AbstractTableModel{
 		return endpoint;
 	}
 	
-	
-	public Sensor getSensor(int rowIndex) {
-		return endpoint.getSensors().get(rowIndex);
-	}
+
 	
 	public int getIndexOf(Sensor sensor) {
 		int index = -1;
